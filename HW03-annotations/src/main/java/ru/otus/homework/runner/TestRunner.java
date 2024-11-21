@@ -10,13 +10,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TestRunner {
 
     private final Logger log = LoggerFactory.getLogger(TestRunner.class);
 
-    public void run(Class<?> testClass) throws NoSuchMethodException,
+    public TestResult run(Class<?> testClass) throws NoSuchMethodException,
             InvocationTargetException,
             InstantiationException,
             IllegalAccessException
@@ -26,22 +28,23 @@ public class TestRunner {
         List<Method> afterMethods = getMethodsAnnotatedBy(testClass, After.class);
         int allTests = testMethods.size();
         int passedTests = 0;
+        Map<String, Boolean> results = new HashMap<>();
 
         for (Method testMethod : testMethods) {
             Object testObject = testClass.getDeclaredConstructor().newInstance();
-            invokeMethods(beforeMethods, testObject);
             try {
+                invokeMethods(beforeMethods, testObject);
                 testMethod.invoke(testObject);
+                invokeMethods(afterMethods, testObject);
                 passedTests++;
+                results.put(testMethod.getName(), true);
             } catch (InvocationTargetException ex) {
                 log.error(ex.getTargetException().getMessage());
+                results.put(testMethod.getName(), false);
             }
-            invokeMethods(afterMethods, testObject);
         }
 
-        log.info("All tests: {}", allTests);
-        log.info("Passed: {}", passedTests);
-        log.info("Failed: {}", allTests - passedTests);
+        return new TestResult(allTests, passedTests, allTests - passedTests, results);
     }
 
     private void invokeMethods(List<Method> beforeMethods, Object testObject) throws IllegalAccessException,
