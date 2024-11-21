@@ -44,7 +44,7 @@ public class TestRunner {
         log.info("Failed: {}", allTests - passedTests);
     }
 
-    private static void invokeMethods(List<Method> beforeMethods, Object testObject) throws IllegalAccessException,
+    private void invokeMethods(List<Method> beforeMethods, Object testObject) throws IllegalAccessException,
             InvocationTargetException {
         for (Method beforeMethod : beforeMethods) {
             beforeMethod.invoke(testObject);
