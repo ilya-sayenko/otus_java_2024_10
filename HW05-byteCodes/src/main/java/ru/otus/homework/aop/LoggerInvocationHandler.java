@@ -13,15 +13,15 @@ import java.util.stream.Collectors;
 
 public class LoggerInvocationHandler implements InvocationHandler {
 
-    private final CalculationService calculationService;
+    private final Object object;
 
     private final Set<String> logMethods;
 
     private static final Logger log = LoggerFactory.getLogger(LoggerInvocationHandler.class);
 
-    public LoggerInvocationHandler(CalculationService calculationService) {
-        this.calculationService = calculationService;
-        logMethods = Arrays.stream(calculationService.getClass().getMethods())
+    public LoggerInvocationHandler(CalculationService object) {
+        this.object = object;
+        logMethods = Arrays.stream(object.getClass().getMethods())
                 .filter(method -> method.isAnnotationPresent(Log.class))
                 .map(this::convertToString)
                 .collect(Collectors.toSet());
@@ -33,7 +33,7 @@ public class LoggerInvocationHandler implements InvocationHandler {
             log.info("executed method: {}, parameters: {}", method.getName(), args);
         }
 
-        return method.invoke(calculationService, args);
+        return method.invoke(object, args);
     }
 
     private String convertToString(Method method) {
