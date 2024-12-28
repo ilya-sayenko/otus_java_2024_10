@@ -14,13 +14,18 @@ public class HistoryListener implements Listener, HistoryReader {
 
     @Override
     public void onUpdated(Message msg) {
-        ObjectForMessage objectForMessage = new ObjectForMessage();
-        objectForMessage.setData(new ArrayList<>(msg.getField13().getData()));
-        history.put(msg.getId(), msg.toBuilder().field13(objectForMessage).build());
+        history.put(msg.getId(), copy(msg));
     }
 
     @Override
     public Optional<Message> findMessageById(long id) {
         return Optional.ofNullable(history.get(id));
+    }
+
+    private Message copy(Message msg) {
+        ObjectForMessage objectForMessage = new ObjectForMessage();
+        objectForMessage.setData(new ArrayList<>(msg.getField13().getData()));
+
+        return msg.toBuilder().field13(objectForMessage).build();
     }
 }

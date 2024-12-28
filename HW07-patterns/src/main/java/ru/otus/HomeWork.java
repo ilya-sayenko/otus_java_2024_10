@@ -31,7 +31,7 @@ public class HomeWork {
     public static void main(String[] args) {
         var processors = List.of(
                 new ProcessorSwap(),
-                new ProcessorThrowEvenSecond(LocalDateTime.now())
+                new ProcessorThrowEvenSecond(LocalDateTime::now)
         );
 
         var complexProcessor = new ComplexProcessor(processors, ex -> {});
