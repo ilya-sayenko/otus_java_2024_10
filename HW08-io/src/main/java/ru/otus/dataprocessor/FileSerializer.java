@@ -2,9 +2,8 @@ package ru.otus.dataprocessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class FileSerializer implements Serializer {
@@ -19,6 +18,6 @@ public class FileSerializer implements Serializer {
 
     @Override
     public void serialize(Map<String, Double> data) throws IOException {
-        Files.writeString(Path.of(fileName), objectMapper.writeValueAsString(data));
+        objectMapper.writeValue(new File(fileName), data);
     }
 }
