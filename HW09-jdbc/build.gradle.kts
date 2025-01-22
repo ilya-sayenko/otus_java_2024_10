@@ -5,4 +5,9 @@ dependencies {
     implementation("com.zaxxer:HikariCP")
 
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
+
+    testImplementation ("org.junit.jupiter:junit-jupiter-api")
+    testImplementation ("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation ("org.assertj:assertj-core")
+    testImplementation ("org.mockito:mockito-junit-jupiter")
 }
