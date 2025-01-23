@@ -1,8 +1,10 @@
 package ru.otus.jdbc.mapper;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,16 +38,7 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
                 connection,
                 entitySQLMetaData.getSelectByIdSql(),
                 List.of(id),
-                rs -> {
-                    try {
-                        if (rs.next()) {
-                            return entityClassMetaData.getConstructor().newInstance(getFieldValues(rs));
-                        }
-                        return null;
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
+                this::findByIdResultSetHandler
         );
     }
 
@@ -55,18 +48,8 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
                 connection,
                 entitySQLMetaData.getSelectAllSql(),
                 Collections.emptyList(),
-                rs -> {
-                    ArrayList<T> resultList = new ArrayList<>();
-                    try {
-                        while (rs.next()) {
-                            resultList.add(entityClassMetaData.getConstructor().newInstance(getFieldValues(rs)));
-                        }
-                        return resultList;
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-        ).orElseThrow(() -> new RuntimeException());
+                this::findAllResultSetHandler
+        ).orElse(new ArrayList<>());
     }
 
     @Override
@@ -87,18 +70,47 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
         );
     }
 
-    private Object[] getFieldValues(ResultSet rs) {
+    private T findByIdResultSetHandler(ResultSet rs) {
         try {
-            List<Field> fieldList = entityClassMetaData.getAllFields();
-            Object[] objects = new Object[fieldList.size()];
-            objects[0] = rs.getLong(entityClassMetaData.getIdField().getName());
-            for (int i = 1; i < fieldList.size(); i++) {
-                objects[i] = rs.getObject(fieldList.get(i).getName());
+            if (rs.next()) {
+                return createObjectFromResultSet(rs);
             }
-            return objects;
+            return null;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private ArrayList<T> findAllResultSetHandler(ResultSet rs) {
+        ArrayList<T> resultList = new ArrayList<>();
+        try {
+            while (rs.next()) {
+                T object = createObjectFromResultSet(rs);
+                resultList.add(object);
+            }
+            return resultList;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private T createObjectFromResultSet(ResultSet rs) throws
+            InstantiationException,
+            IllegalAccessException,
+            InvocationTargetException,
+            NoSuchFieldException,
+            SQLException
+    {
+        T object = entityClassMetaData.getConstructor().newInstance();
+        for (Field field : entityClassMetaData.getAllFields()) {
+            String fieldName = field.getName();
+            Field objectField = object.getClass().getDeclaredField(fieldName);
+            if (!objectField.canAccess(object)) {
+                objectField.setAccessible(true);
+            }
+            objectField.set(object, rs.getObject(fieldName));
+        }
+        return object;
     }
 
     private List<Object> getFieldValues(T object, List<Field> fields) {

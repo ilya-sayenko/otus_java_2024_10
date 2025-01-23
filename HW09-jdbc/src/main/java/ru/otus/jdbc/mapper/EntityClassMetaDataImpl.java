@@ -9,6 +9,10 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
 
     private final Class<T> clazz;
 
+    private Field idField;
+
+    private List<Field> fieldsWithoutId;
+
     public EntityClassMetaDataImpl(Class<T> clazz) {
         this.clazz = clazz;
     }
@@ -20,20 +24,23 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
 
     @Override
     public Constructor<T> getConstructor() {
-        int fieldsCount = getAllFields().size();
-
-        return (Constructor<T>) Arrays.stream(clazz.getDeclaredConstructors())
-                .filter(constructor -> constructor.getParameterCount() == fieldsCount)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Constructor not found"));
+        try {
+            return clazz.getConstructor();
+        } catch (Exception ex) {
+            throw new RuntimeException("Constructor not found");
+        }
     }
 
     @Override
     public Field getIdField() {
-        return Arrays.stream(clazz.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Id.class))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Id field not found"));
+        if (idField == null) {
+            idField = Arrays.stream(clazz.getDeclaredFields())
+                    .filter(field -> field.isAnnotationPresent(Id.class))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Id field not found"));
+        }
+
+        return idField;
     }
 
     @Override
@@ -43,8 +50,12 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
 
     @Override
     public List<Field> getFieldsWithoutId() {
-        return Arrays.stream(clazz.getDeclaredFields())
-                .filter(field -> !field.isAnnotationPresent(Id.class))
-                .toList();
+        if (fieldsWithoutId == null) {
+            fieldsWithoutId = Arrays.stream(clazz.getDeclaredFields())
+                    .filter(field -> !field.isAnnotationPresent(Id.class))
+                    .toList();
+        }
+
+        return fieldsWithoutId;
     }
 }
