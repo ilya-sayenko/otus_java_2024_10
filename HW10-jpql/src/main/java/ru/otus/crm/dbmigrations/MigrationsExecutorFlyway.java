@@ -12,6 +12,8 @@ public class MigrationsExecutorFlyway {
     public MigrationsExecutorFlyway(String dbUrl, String dbUserName, String dbPassword) {
         flyway = Flyway.configure()
                 .dataSource(dbUrl, dbUserName, dbPassword)
+                .baselineOnMigrate(true)
+                .baselineVersion("0")
                 .locations("classpath:/db/migration")
                 .load();
     }
