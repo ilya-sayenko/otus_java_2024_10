@@ -9,6 +9,7 @@ include("HW07-patterns")
 include("HW08-io")
 include("HW09-jdbc")
 include("HW10-jpql")
+include("HW11-cache")
 
 pluginManagement {
     val jgitver: String by settings
