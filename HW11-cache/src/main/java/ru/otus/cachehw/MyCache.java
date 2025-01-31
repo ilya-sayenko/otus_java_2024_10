@@ -1,30 +1,50 @@
 package ru.otus.cachehw;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.WeakHashMap;
+
+import static ru.otus.cachehw.Action.GET;
+import static ru.otus.cachehw.Action.PUT;
+import static ru.otus.cachehw.Action.REMOVE;
+
 public class MyCache<K, V> implements HwCache<K, V> {
-    // Надо реализовать эти методы
+
+    private final WeakHashMap<K, V> cache = new WeakHashMap<>();
+
+    private final List<HwListener<K,V>> listeners = new ArrayList<>();
 
     @Override
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        cache.put(key, value);
+        notifyListeners(key, value, PUT);
     }
 
     @Override
     public void remove(K key) {
-        throw new UnsupportedOperationException();
+        V value = cache.get(key);
+        cache.remove(key);
+        notifyListeners(key, value, REMOVE);
     }
 
     @Override
     public V get(K key) {
-        throw new UnsupportedOperationException();
+        V value = cache.get(key);
+        notifyListeners(key, value, GET);
+        return value;
     }
 
     @Override
     public void addListener(HwListener<K, V> listener) {
-        throw new UnsupportedOperationException();
+        listeners.add(listener);
     }
 
     @Override
     public void removeListener(HwListener<K, V> listener) {
-        throw new UnsupportedOperationException();
+        listeners.remove(listener);
+    }
+
+    private void notifyListeners(K key, V value, Action action) {
+        listeners.forEach(listener -> listener.notify(key, value, action.name()));
     }
 }
