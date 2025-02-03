@@ -1,5 +1,7 @@
 package ru.otus.cachehw;
 
+import ru.otus.cachehw.exception.ListenerException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -45,6 +47,11 @@ public class MyCache<K, V> implements HwCache<K, V> {
     }
 
     private void notifyListeners(K key, V value, Action action) {
-        listeners.forEach(listener -> listener.notify(key, value, action.name()));
+        try {
+            listeners.forEach(listener -> listener.notify(key, value, action.name()));
+        } catch (Exception ex) {
+            throw new ListenerException(String.format("Listener exception: %s", ex.getMessage()));
+        }
+
     }
 }
