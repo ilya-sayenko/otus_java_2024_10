@@ -18,12 +18,12 @@ public class DbServiceClientImpl implements DBServiceClient {
 
     private final TransactionManager transactionManager;
 
-    private final HwCache<Long, Optional<Client>> cache;
+    private final HwCache<String, Client> cache;
 
     public DbServiceClientImpl(
             TransactionManager transactionManager,
             DataTemplate<Client> clientDataTemplate,
-            HwCache<Long, Optional<Client>> cache
+            HwCache<String, Client> cache
     ) {
         this.transactionManager = transactionManager;
         this.clientDataTemplate = clientDataTemplate;
@@ -37,20 +37,21 @@ public class DbServiceClientImpl implements DBServiceClient {
             if (client.getId() == null) {
                 var savedClient = clientDataTemplate.insert(session, clientCloned);
                 log.info("created client: {}", clientCloned);
-                cache.put(clientCloned.getId(), Optional.of(clientCloned));
+                cache.put(clientCloned.getId().toString(), clientCloned);
                 return savedClient;
             }
             var savedClient = clientDataTemplate.update(session, clientCloned);
             log.info("updated client: {}", savedClient);
-            cache.put(clientCloned.getId(), Optional.of(clientCloned));
+            cache.put(clientCloned.getId().toString(), clientCloned);
             return savedClient;
         });
     }
 
     @Override
     public Optional<Client> getClient(long id) {
-        if (cache.get(id).isPresent()) {
-            return cache.get(id);
+        Client clientCache = cache.get(String.valueOf(id));
+        if (clientCache != null) {
+            return Optional.of(clientCache);
         } else {
             return transactionManager.doInReadOnlyTransaction(session -> {
                 var clientOptional = clientDataTemplate.findById(session, id);

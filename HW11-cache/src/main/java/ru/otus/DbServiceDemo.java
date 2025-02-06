@@ -35,7 +35,7 @@ public class DbServiceDemo {
         var sessionFactory = HibernateUtils.buildSessionFactory(configuration, Client.class, Address.class, Phone.class);
         var transactionManager = new TransactionManagerHibernate(sessionFactory);
         var clientTemplate = new DataTemplateHibernate<>(Client.class);
-        HwCache<Long, Optional<Client>> cache = new MyCache<>();
+        HwCache<String, Client> cache = new MyCache<>();
         var dbServiceClient = new DbServiceClientImpl(transactionManager, clientTemplate, cache);
 
         dbServiceClient.saveClient(
