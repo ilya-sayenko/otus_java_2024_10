@@ -25,7 +25,31 @@
          function getAllClients() {
             fetch('api/clients')
                 .then(response => response.json())
-                .then(clients => clientsDataContainer.innerHTML = JSON.stringify(clients,null,4));
+                .then(clients => createClientTable(clients));
+        }
+
+        function createClientTable(clients) {
+            document.getElementById('clientsTable').innerHTML = '';
+            const table = document.createElement('table');
+            const row = table.insertRow();
+            row.insertCell().textContent = 'Id';
+            row.insertCell().textContent = 'Имя';
+            row.insertCell().textContent = 'Адрес';
+            row.insertCell().textContent = 'Телефоны';
+            clients.forEach(client => {
+                    const row = table.insertRow();
+                    const cellId = row.insertCell();
+                    cellId.textContent = client.id;
+                    const cellName = row.insertCell();
+                    cellName.textContent = client.name;
+                    const cellAddress = row.insertCell();
+                    cellAddress.textContent = client.address.street;
+                    const cellPhones = row.insertCell();
+                    cellPhones.textContent = client.phones.map(phone => phone.number).join(", ");
+                }
+            );
+            table.style.border = '1px solid';
+            document.getElementById('clientsTable').appendChild(table);
         }
     </script>
 </head>
@@ -48,6 +72,6 @@
 
     <h4>Клиенты</h4>
     <button onclick="getAllClients()">Получить всех клиентов</button>
-    <pre id="clientsDataContainer"></pre>
+    <div id="clientsTable"></div>
 </body>
 </html>

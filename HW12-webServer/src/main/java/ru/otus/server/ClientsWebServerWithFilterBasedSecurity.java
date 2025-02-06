@@ -7,6 +7,7 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Handler;
 import org.hibernate.cfg.Configuration;
+import ru.otus.crm.service.DBServiceClient;
 import ru.otus.dao.UserDao;
 import ru.otus.services.TemplateProcessor;
 import ru.otus.services.UserAuthService;
@@ -22,9 +23,10 @@ public class ClientsWebServerWithFilterBasedSecurity extends ClientsWebServerSim
             UserDao userDao,
             Gson gson,
             TemplateProcessor templateProcessor,
-            Configuration dbConfig
+            Configuration dbConfig,
+            DBServiceClient dbServiceClient
     ) {
-        super(port, userDao, gson, templateProcessor, dbConfig);
+        super(port, userDao, gson, templateProcessor, dbConfig, dbServiceClient);
         this.authService = authService;
     }
 

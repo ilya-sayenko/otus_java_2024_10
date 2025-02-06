@@ -38,26 +38,27 @@ public class ClientsWebServerSimple implements ClientsWebServer {
 
     private final Server server;
 
-    private DBServiceClient dbServiceClient;
+    private final DBServiceClient dbServiceClient;
 
     public ClientsWebServerSimple(
             int port,
             UserDao userDao,
             Gson gson,
             TemplateProcessor templateProcessor,
-            Configuration dbConfig
+            Configuration dbConfig,
+            DBServiceClient dbServiceClient
     ) {
         this.userDao = userDao;
         this.gson = gson;
         this.dbConfig = dbConfig;
         this.templateProcessor = templateProcessor;
+        this.dbServiceClient = dbServiceClient;
         server = new Server(port);
     }
 
     @Override
     public void start() throws Exception {
         if (server.getHandlers().isEmpty()) {
-            initDbMigration();
             initContext();
         }
         server.start();
@@ -73,20 +74,7 @@ public class ClientsWebServerSimple implements ClientsWebServer {
         server.stop();
     }
 
-    private void initDbMigration() {
-        String dbUrl = dbConfig.getProperty("hibernate.connection.url");
-        String dbUserName = dbConfig.getProperty("hibernate.connection.username");
-        String dbPassword = dbConfig.getProperty("hibernate.connection.password");
-
-        new MigrationsExecutorFlyway(dbUrl, dbUserName, dbPassword).executeMigrations();
-    }
-
     private void initContext() {
-        var sessionFactory = HibernateUtils.buildSessionFactory(dbConfig, Client.class, Address.class, Phone.class);
-        var transactionManager = new TransactionManagerHibernate(sessionFactory);
-        var clientTemplate = new DataTemplateHibernate<>(Client.class);
-        this.dbServiceClient = new DbServiceClientImpl(transactionManager, clientTemplate);
-
         ResourceHandler resourceHandler = createResourceHandler();
         ServletContextHandler servletContextHandler = createServletContextHandler();
 
