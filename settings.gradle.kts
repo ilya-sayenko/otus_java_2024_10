@@ -11,6 +11,7 @@ include("HW09-jdbc")
 include("HW10-jpql")
 include("HW11-cache")
 include("HW12-webServer")
+include("HW13-di")
 
 pluginManagement {
     val jgitver: String by settings
