@@ -51,7 +51,7 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
             for (Method method : methods) {
                 String componentName = method.getAnnotation(AppComponent.class).name();
                 if (appComponentsByName.get(componentName) != null) {
-                    throw new RuntimeException();
+                    throw new RuntimeException(String.format("Component %s has been already created", componentName));
                 }
 
                 List<Object> arguments = findMethodArguments(method);
@@ -89,11 +89,11 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
                 .toList();
 
         if (components.isEmpty()) {
-            throw new RuntimeException();
+            throw new RuntimeException("Component not found");
         }
 
         if (components.size() > 1) {
-            throw new RuntimeException();
+            throw new RuntimeException("Too many duplicates");
         }
 
         return (C) components.getFirst();
@@ -103,7 +103,7 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
     public <C> C getAppComponent(String componentName) {
         Object component = appComponentsByName.get(componentName);
         if (component == null) {
-            throw new RuntimeException();
+            throw new RuntimeException("Component not found");
         }
 
         return (C) component;
