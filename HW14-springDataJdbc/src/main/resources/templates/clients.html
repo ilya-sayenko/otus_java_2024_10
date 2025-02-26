@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Клиенты</title>
+    <script>
+        function createClient() {
+            const clientName = document.getElementById('clientNameTextBox').value;
+            const clientAddress = document.getElementById('clientAddressTextBox').value;
+            const clientPhone = document.getElementById('clientPhoneTextBox').value;
+            var client = {
+                name: clientName,
+                address: clientAddress,
+                phones: [{number : clientPhone}]
+            };
+
+            fetch('api/clients', {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(client)
+            });
+        }
+
+         function getAllClients() {
+            fetch('api/clients')
+                .then(response => response.json())
+                .then(clients => createClientTable(clients));
+        }
+
+        function createClientTable(clients) {
+            document.getElementById('clientsTable').innerHTML = '';
+            const table = document.createElement('table');
+            const row = table.insertRow();
+            row.insertCell().textContent = 'Id';
+            row.insertCell().textContent = 'Имя';
+            row.insertCell().textContent = 'Адрес';
+            row.insertCell().textContent = 'Телефоны';
+            clients.forEach(client => {
+                    const row = table.insertRow();
+                    const cellId = row.insertCell();
+                    cellId.textContent = client.id;
+                    const cellName = row.insertCell();
+                    cellName.textContent = client.name;
+                    const cellAddress = row.insertCell();
+                    cellAddress.textContent = client.address.street;
+                    const cellPhones = row.insertCell();
+                    cellPhones.textContent = client.phones.map(phone => phone.number).join(", ");
+                }
+            );
+            table.style.border = '1px solid';
+            document.getElementById('clientsTable').appendChild(table);
+        }
+    </script>
+</head>
+
+<body>
+    <h4>Создать клиента</h4>
+    <label>Имя <br/>
+        <input type="text" id = "clientNameTextBox" placeholder="Введите имя клиента">
+    </label>
+    <br/>
+    <label>Адрес <br/>
+        <input type="text" id = "clientAddressTextBox" placeholder="Введите адрес клиента">
+    </label>
+    <br/>
+    <label>Телефон <br/>
+        <input type="text" id = "clientPhoneTextBox" placeholder="Введите телефон клиента">
+    </label>
+    <br/>
+    <button onclick="createClient()">Создать</button>
+
+    <h4>Клиенты</h4>
+    <button onclick="getAllClients()">Получить всех клиентов</button>
+    <div id="clientsTable"></div>
+</body>
+</html>
