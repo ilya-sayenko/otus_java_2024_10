@@ -3,7 +3,7 @@ let stompClient = null;
 const chatLineElementId = "chatLine";
 const roomIdElementId = "roomId";
 const messageElementId = "message";
-
+const specialRoom = "1408";
 
 const setConnected = (connected) => {
     const connectBtn = document.getElementById("connect");
@@ -15,12 +15,17 @@ const setConnected = (connected) => {
     chatLine.hidden = !connected;
 }
 
+const handleSpecialRoom = (roomId) => {
+    document.getElementById("send").disabled = (roomId === specialRoom);
+}
+
 const connect = () => {
     stompClient = Stomp.over(new SockJS('/gs-guide-websocket'));
     stompClient.connect({}, (frame) => {
         setConnected(true);
-        const userName = frame.headers["user-name"];
         const roomId = document.getElementById(roomIdElementId).value;
+        handleSpecialRoom(roomId);
+        const userName = frame.headers["user-name"];
         console.log(`Connected to roomId: ${roomId} frame:${frame}`);
         const topicName = `/topic/response.${roomId}`;
         const topicNameUser = `/user/${userName}${topicName}`;

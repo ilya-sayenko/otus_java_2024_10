@@ -14,6 +14,7 @@ import ru.petrelevich.repository.MessageRepository;
 
 @Service
 public class DataStoreR2dbc implements DataStore {
+    private static final String SPECIAL_ROOM = "1408";
     private static final Logger log = LoggerFactory.getLogger(DataStoreR2dbc.class);
     private final MessageRepository messageRepository;
     private final Scheduler workerPool;
@@ -26,12 +27,19 @@ public class DataStoreR2dbc implements DataStore {
     @Override
     public Mono<Message> saveMessage(Message message) {
         log.info("saveMessage:{}", message);
+        if (message.roomId().equals(SPECIAL_ROOM)) {
+            throw new RuntimeException("It is impossible to save message into room " + SPECIAL_ROOM);
+        }
         return messageRepository.save(message);
     }
 
     @Override
     public Flux<Message> loadMessages(String roomId) {
         log.info("loadMessages roomId:{}", roomId);
-        return messageRepository.findByRoomId(roomId).delayElements(Duration.of(3, SECONDS), workerPool);
+        if (roomId.equals(SPECIAL_ROOM)) {
+            return messageRepository.findAll().delayElements(Duration.of(3, SECONDS), workerPool);
+        } else {
+            return messageRepository.findByRoomId(roomId).delayElements(Duration.of(3, SECONDS), workerPool);
+        }
     }
 }
