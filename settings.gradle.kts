@@ -16,6 +16,8 @@ include("HW14-springDataJdbc")
 include("HW15-executors")
 include("HW16-concurrentCollections")
 include("HW17-multiprocess")
+include("HW18-webflux:client-service")
+include("HW18-webflux:datastore-service")
 
 pluginManagement {
     val jgitver: String by settings
